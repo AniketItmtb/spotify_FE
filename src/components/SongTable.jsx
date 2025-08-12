@@ -142,18 +142,20 @@ const SongTable = ({
                   </div>
 
                   {/* Song Info */}
-                  <div className="space-y-1 min-w-0">
-                    <h3 className="text-white flex flex-wrap gap-3 items-center text-lg font-semibold break-words">
+                  <div className="space-y-1 min-w-0 w-full">
+                    <h3 className="text-white flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3 items-start sm:items-center text-base sm:text-lg font-semibold break-words">
+                      {/* Song Title */}
                       <a
                         href={song.track_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:underline hover:text-violet-400 truncate max-w-full"
+                        className="hover:underline hover:text-violet-400 break-words w-full sm:w-auto"
                       >
                         {song.track_name}
                       </a>
+
                       {/* Tags */}
-                      <div className="flex flex-wrap gap-1 text-xs">
+                      <div className="flex flex-wrap gap-1 text-xs w-full sm:w-auto mt-1 sm:mt-0">
                         {song.city && (
                           <span className="border border-purple-500 text-purple-400 rounded hover:bg-purple-500 hover:text-white transition px-2 py-0.5 whitespace-nowrap">
                             {song.city}
@@ -168,7 +170,7 @@ const SongTable = ({
                     </h3>
 
                     {/* Artists + Source */}
-                    <div className="flex flex-wrap items-center text-sm text-gray-400 gap-1 max-w-full">
+                    <div className="flex flex-wrap items-center  text-sm text-gray-400 gap-1 max-w-full">
                       <p
                         className="truncate max-w-[180px] sm:max-w-[250px] md:max-w-[350px]"
                         title={song.artists.join(", ")}

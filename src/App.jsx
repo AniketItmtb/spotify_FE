@@ -235,10 +235,7 @@ const Index = () => {
           </div>
           <h1 className="text-5xl md:text-7xl font-bold text-yellow-400 mb-6">
             Spotify City Charts
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-400 mb-12">
-            Track top songs by city, week, and artist
-          </p>
+          </h1> 
           <p>powered by SPOTIFY...🎵</p>
         </div>
       </section>
