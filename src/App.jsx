@@ -5,24 +5,58 @@ import FiltersSection from "./components/Filter";
 import { useEffect } from "react"; 
 const API = import.meta.env.VITE_API;
 
-// console.log(SONGS_API)
 const Index = () => {
-  function getFormattedToday() {
-    const today = new Date();
+ function getSpecialDate(today = new Date()) {
+   const targetDates = [
+     { month: 8, days: [1, 2, 3, 4, 5, 6] }, // Aug
+     { month: 2, days: [15, 16, 17, 18, 19] }, // Feb
+     { month: 2, days: [27, 28] }, // Feb
+     { month: 3, days: [4, 5, 6, 7, 8, 9, 10, 11] }, // March
+   ];
 
-    // Day with leading zero
-    const day = String(today.getDate()).padStart(2, "0");
+   const day = today.getDate();
+   const month = today.getMonth() + 1; // 1-based
+   const year = today.getFullYear();
 
-    // Full month name
-    const month = today.toLocaleString("en-US", { month: "long" });
+   // 1️⃣ If today is Friday → return today
+   if (today.getDay() === 5) {
+     return formatDate(today);
+   }
 
-    // Full year
-    const year = today.getFullYear();
+   // 2️⃣ If date > 11-Aug but not Friday → return 12-Aug
+   if (month === 8 && day > 11) {
+     return `12-August-${year}`;
+   }
 
-    return `${day}-${month}-${year}`;
-  }
+   // 3️⃣ If before 11-Aug → find nearest past date from list
+   let possibleDates = [];
+   targetDates.forEach(({ month: m, days }) => {
+     days.forEach((d) => {
+       let dateObj = new Date(year, m - 1, d);
+       if (dateObj < today) {
+         possibleDates.push(dateObj);
+       }
+     });
+   });
 
-  console.log(getFormattedToday()); // e.g. "07-August-2025"
+   if (possibleDates.length > 0) {
+     let nearest = possibleDates.reduce((prev, curr) => {
+       return Math.abs(curr - today) < Math.abs(prev - today) ? curr : prev;
+     });
+     return formatDate(nearest);
+   }
+
+   // Default fallback
+   return formatDate(today);
+ }
+
+ function formatDate(dateObj) {
+   const day = String(dateObj.getDate()).padStart(2, "0");
+   const monthName = dateObj.toLocaleString("en-US", { month: "long" });
+   const year = dateObj.getFullYear();
+   return `${day}-${monthName}-${year}`;
+ }
+
   
   const [isLoading, setIsLoading] = useState(false); 
   const [songData, setSongData] = useState([]);
@@ -30,17 +64,15 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState({ key: "rank", direction: "asc" });
   const [selectedCity, setSelectedCity] = useState("");
-  const [selectedDate, setSelectedDate] = useState(getFormattedToday());
+  const [selectedDate, setSelectedDate] = useState(getSpecialDate());
   const songsPerPage = 10;
 
   // 🔍 FILTERING
   const filteredSongs = songData.filter((song) => {
     
-    const dateMatch = selectedDate ? song.scraped_Date === selectedDate : true;
-    const cityMatch = selectedCity.toLowerCase() ? song.city.toLowerCase() === selectedCity.toLowerCase() : true;
-    console.log(`Selected City: ${selectedCity.toLowerCase()} , song.city: ${song.city.toLowerCase()}`);
-    // console.log(`Filtering: Date Match - ${dateMatch}, City Match - ${cityMatch}`);
-    return dateMatch && cityMatch;
+    // const dateMatch = selectedDate ? song.scraped_Date === selectedDate : true;
+    const cityMatch = selectedCity.toLowerCase() ? song.city.toLowerCase() === selectedCity.toLowerCase() : true; 
+    return  cityMatch;
   });
 
  const sortedSongs = [...filteredSongs].sort((a, b) => {
@@ -102,9 +134,7 @@ const Index = () => {
    return aVal.localeCompare(bVal) * direction;
  });
 
-  console.log(`SORTED LENGTH: ${sortedSongs.length}`);
   const totalPages = Math.ceil(sortedSongs.length / songsPerPage);
-  console.log(`TOTAL PAGES: ${totalPages}`);
   const currentSongs = sortedSongs.slice(
     (currentPage - 1) * songsPerPage,
     currentPage * songsPerPage
@@ -124,20 +154,26 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const dateParam = getSpecialDate(new Date(selectedDate));
+
   useEffect(() => {
     const fetchData = async () => {
      setIsLoading(true);
 
      try {
-       let initialRes = await fetch(`${API}/song`);
+       let initialRes = await fetch(`${API}/song`, {
+         method: "POST",
+         headers: {
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify({ date: dateParam }),
+       });
+
        if (!initialRes.ok) throw new Error("Failed to fetch initial song data");
 
-       let initialData = await initialRes.json(); // This parses the top-level response
-
-       // Now parse the body string, which holds the real JSON payload
+       let initialData = await initialRes.json();
        let parsedBody = JSON.parse(initialData.body);
 
-       console.log(parsedBody.data);
        setSongData(parsedBody.data);
        setCurrentPage(1);
        setHasScraped(true);
@@ -151,7 +187,7 @@ const Index = () => {
     };
 
     fetchData();
-  }, []);
+  }, [selectedDate, dateParam]);
 
   return (
     <div className="min-h-screen bg-black text-gray-200">

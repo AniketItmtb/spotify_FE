@@ -5,8 +5,7 @@ const FiltersSection = ({
   setSelectedDate,
   selectedCity, 
   currentSongs,
-  filteredSongs,
-  selectedDate,
+  filteredSongs, 
 }) => {
   const [formattedDate, setFormattedDate] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -40,9 +39,7 @@ const FiltersSection = ({
 
     const newFormattedDate = `${day}-${month}-${year}`;
     setFormattedDate(newFormattedDate);
-    console.log(`Formatted Date: ${newFormattedDate}`);
     setSelectedDate(newFormattedDate);
-    console.log(`Selected Date: ${selectedDate}`);
   };
 
   const handleSubmit = () => {
@@ -92,7 +89,6 @@ const FiltersSection = ({
               value={selectedCity}
               onChange={(e) => {
                 setSelectedCity(e.target.value);
-                console.log(`Selected City: ${e.target.value}`);
               }}
               
               className="w-full border border-gray-700 px-3 py-2 rounded bg-gray-900 text-gray-200 mb-4 focus:outline-none focus:ring-2 focus:ring-yellow-400"
