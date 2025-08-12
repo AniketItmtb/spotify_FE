@@ -132,18 +132,19 @@ const SongTable = ({
           >
             {/* City + Scraped Date */}
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-3 border-b border-gray-800">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 border-b border-gray-800">
               {/* Left: Rank + Info */}
-              <div className="flex gap-3 w-full sm:w-auto">
-                <div className="flex items-start gap-4">
+              <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+                <div className="flex items-start gap-3 sm:gap-4 w-full">
                   {/* Rank Badge */}
-                  <div className="w-10 h-10 rounded-full bg-purple-700 text-white font-bold text-sm flex items-center justify-center shadow shrink-0">
+                  <div className="w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 rounded-full bg-purple-700 text-white font-bold text-xs xs:text-sm flex items-center justify-center shadow shrink-0">
                     #{song.rank}
                   </div>
 
                   {/* Song Info */}
                   <div className="space-y-1 min-w-0 w-full">
-                    <h3 className="text-white flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3 items-start sm:items-center text-base sm:text-lg font-semibold break-words">
+                    {/* Title + Tags */}
+                    <h3 className="text-white flex flex-col sm:flex-row sm:flex-wrap gap-1 sm:gap-3 items-start sm:items-center text-sm xs:text-base sm:text-lg font-semibold break-words">
                       {/* Song Title */}
                       <a
                         href={song.track_url}
@@ -155,7 +156,7 @@ const SongTable = ({
                       </a>
 
                       {/* Tags */}
-                      <div className="flex flex-wrap gap-1 text-xs w-full sm:w-auto mt-1 sm:mt-0">
+                      <div className="flex flex-wrap gap-1 text-[10px] xs:text-xs w-full sm:w-auto mt-1 sm:mt-0">
                         {song.city && (
                           <span className="border border-purple-500 text-purple-400 rounded hover:bg-purple-500 hover:text-white transition px-2 py-0.5 whitespace-nowrap">
                             {song.city}
@@ -169,31 +170,46 @@ const SongTable = ({
                       </div>
                     </h3>
 
-                    {/* Artists + Source */}
-                    <div className="flex flex-wrap items-center  text-sm text-gray-400 gap-1 max-w-full">
-                      <p
-                        className="truncate max-w-[180px] sm:max-w-[250px] md:max-w-[350px]"
-                        title={song.artists.join(", ")}
-                      >
-                        {song.artists.join(", ")}
-                      </p>
+                    {/* Artists + Source + Image (mobile first) */}
+                    <div className="flex sm:flex-row  flex-wrap items-center gap-2 text-xs xs:text-sm text-gray-400 max-w-full">
+                      {/* Image (mobile only) */}
+                      <div className="w-12 h-12 xs:w-14 xs:h-14 sm:hidden rounded-lg overflow-hidden border border-gray-700 shadow shrink-0 flex-none">
+                        <img
+                          src={song.image_url}
+                          alt={song.track_name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
 
-                      {song.details.Source && (
-                        <div
-                          className="truncate max-w-[120px] sm:max-w-[200px] md:max-w-[250px] flex-shrink"
-                          title={song.details.Source}
+                      {/* Text Info */}
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        {/* Artists */}
+                        <p
+                          className="truncate max-w-[140px] xs:max-w-[180px] sm:max-w-[250px] md:max-w-[350px]"
+                          title={song.artists.join(", ")}
                         >
-                          <span className="text-gray-400"> || Source: </span>
-                          {song.details.Source}
-                        </div>
-                      )}
+                          {song.artists.join(", ")}
+                        </p>
+
+                        {/* Source */}
+                        {song.details.Source && (
+                          <div
+                            className="truncate max-w-[100px] xs:max-w-[150px] sm:max-w-[200px] md:max-w-[250px] flex-shrink"
+                            title={song.details.Source}
+                          >
+                            <span className="text-gray-400"> || Source: </span>
+                            {song.details.Source}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Image */}
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-gray-700 shadow shrink-0">
+              {/* Image (desktop only) */}
+              <div className="hidden sm:block w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-gray-700 shadow shrink-0">
                 <img
                   src={song.image_url}
                   alt={song.track_name}

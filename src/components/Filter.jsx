@@ -103,7 +103,7 @@ const FiltersSection = ({
 
             {/* Date Filter */}
             <label className="block text-sm text-gray-400 mb-1">
-              📅 Fetched Date
+              📅 Date
             </label>
             <input
               type="date"
