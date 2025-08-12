@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scraping Progress</title>
+  <style>
+    body { background: #0f0f0f; color: yellow; font-family: sans-serif; text-align: center; padding-top: 50px; }
+    .bar { width: 300px; height: 20px; background: #333; margin: 20px auto; border-radius: 10px; overflow: hidden; }
+    .fill { height: 100%; background: yellow; width: 0; transition: width 0.3s; }
+  </style>
+</head>
+<body>
+  <h1>Scraping in Progress…</h1>
+  <p id="status">Starting...</p>
+  <div class="bar"><div class="fill" id="progress"></div></div>
+
+  <script>
+  
+const cities = [
+  "Ahmedabad",
+  "Bengaluru",
+  "Chandigarh",
+  "Chennai",
+  "Delhi",
+  "Guwahati",
+  "Hyderabad",
+  "Imphal",
+  "Jaipur",
+  "Kochi",
+  "Kolkata",
+  "Lucknow",
+  "Ludhiana",
+  "Mumbai",
+  "Patna",
+  "Pune",
+];
+  let current = 0;
+
+  async function startScraping() {
+    for (let i = 0; i < cities.length; i++) {
+      document.getElementById("status").textContent = `Scraping ${cities[i]} (${i+1}/${cities.length})`;
+      console.log(`http://localhost:5000/scrape?city=${encodeURIComponent(cities[i])}`);
+      await fetch(`http://localhost:5000/scrape?city=${encodeURIComponent(cities[i])}`);
+      current = i + 1;
+      document.getElementById("progress").style.width = `${(current / cities.length) * 100}%`;
+    }
+    document.getElementById("status").textContent = "✅ Scraping Complete";
+
+    // Tell opener (main page) scraping is done
+    window.opener.postMessage("scrapeComplete", "*");
+
+    // Optional: auto-close after 2s
+    setTimeout(() => window.close(), 2000);
+  }
+
+  startScraping();
+</script>
+
+</body>
+</html>
