@@ -6,54 +6,67 @@ import { useEffect } from "react";
 const API = import.meta.env.VITE_API;
 
 const Index = () => {
- function getSpecialDate(today = new Date()) {
-   const targetDates = [
-     { month: 8, days: [8,9,10,11,12] }, // Aug 
-   ];
+function formatDate(date) {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  return `${date.getDate()}-${months[date.getMonth()]}-${date.getFullYear()}`;
+}
 
-   const day = today.getDate();
-   const month = today.getMonth() + 1; // 1-based
-   const year = today.getFullYear();
+function getSpecialDate(today = new Date()) {
+  const targetDates = [
+    { month: 8, days: [8, 9, 10, 11, 12] }, // Aug
+    { month: 2, days: [15, 16, 17, 18, 19] }, // Feb
+    { month: 2, days: [27, 28] }, // Feb
+    { month: 3, days: [4, 5, 6, 7, 8, 9, 10, 11] }, // Mar
+  ];
 
-   // 1️⃣ If today is Friday → return today
-   if (today.getDay() === 5) {
-     return formatDate(today);
-   }
+  const day = today.getDate();
+  const month = today.getMonth() + 1;
+  const year = today.getFullYear();
 
-   // 2️⃣ If date > 11-Aug but not Friday → return 12-Aug
-   if (month === 8 && day > 11) {
-     return `12-August-${year}`;
-   }
+  // Step 1: if date < 9-Aug → find nearest past date from targetDates
+  const aug9 = new Date(year, 7, 18); // Months are 0-indexed
+  if (today < aug9) {
+    let possibleDates = [];
+    targetDates.forEach(({ month: m, days }) => {
+      days.forEach((d) => {
+        const dateObj = new Date(year, m - 1, d);
+        if (dateObj <= today) {
+          possibleDates.push(dateObj);
+        }
+      });
+    });
 
-   // 3️⃣ If before 11-Aug → find nearest past date from list
-   let possibleDates = [];
-   targetDates.forEach(({ month: m, days }) => {
-     days.forEach((d) => {
-       let dateObj = new Date(year, m - 1, d);
-       if (dateObj < today) {
-         possibleDates.push(dateObj);
-       }
-     });
-   });
+    if (possibleDates.length > 0) {
+      const nearest = possibleDates.reduce((prev, curr) =>
+        Math.abs(curr - today) < Math.abs(prev - today) ? curr : prev
+      );
+      return formatDate(nearest);
+    }
+  }
 
-   if (possibleDates.length > 0) {
-     let nearest = possibleDates.reduce((prev, curr) => {
-       return Math.abs(curr - today) < Math.abs(prev - today) ? curr : prev;
-     });
-     return formatDate(nearest);
-   }
+  // Step 2: If today is Friday → return today
+  if (today.getDay() === 5) return formatDate(today);
 
-   // Default fallback
-   return formatDate(today);
- }
-
- function formatDate(dateObj) {
-   const day = String(dateObj.getDate()).padStart(2, "0");
-   const monthName = dateObj.toLocaleString("en-US", { month: "long" });
-   const year = dateObj.getFullYear();
-   return `${day}-${monthName}-${year}`;
- }
-
+  // Step 3: Otherwise, return the next Friday
+  const daysUntilFriday = (5 - today.getDay() + 7) % 7 || 7;
+  const nextFriday = new Date(today);
+  nextFriday.setDate(today.getDate() + daysUntilFriday);
+  return formatDate(nextFriday);
+}
+ 
   
   const [isLoading, setIsLoading] = useState(false); 
   const [songData, setSongData] = useState([]);
@@ -154,8 +167,10 @@ const Index = () => {
   const dateParam = getSpecialDate(new Date(selectedDate));
 
 useEffect(() => {
+
   let isMounted = true; // avoid state updates after unmount
   const songsPerFetch = 250;
+  console.log(`Fetching songs for date: ${dateParam}`);
 const fetchSongsBatch = async (lastKeyParam = null, isFirstBatch = false) => {
   if (!isMounted) return;
   setIsLoading(true);

@@ -3,9 +3,7 @@ import { useState } from "react";
 const FiltersSection = ({
   setSelectedCity,
   setSelectedDate,
-  selectedCity, 
-  currentSongs,
-  filteredSongs, 
+  selectedCity,  
 }) => {
   const [formattedDate, setFormattedDate] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -49,17 +47,29 @@ const FiltersSection = ({
 
   return (
     <div className="flex justify-between items-center p-4 bg-gray-900 border border-gray-700 rounded-xl">
-      <p className="text-sm text-gray-400">
-        Showing{" "}
-        <span className="text-yellow-400 font-semibold">
-          {currentSongs.length}
-        </span>{" "}
-        of{" "}
-        <span className="text-yellow-400 font-semibold">
-          {filteredSongs.length}
-        </span>{" "}
-        songs
-      </p>
+      <button
+        className="text-sm bg-yellow-500 p-2 font-semibold rounded-lg border-2 border-black text-black hover:bg-yellow-400 transition-all cursor-pointer"
+        onClick={async () => {
+          try {
+            const response = await fetch(
+              "https://4woexs3fi2ej7ivpqoaswlxnbu0xyvhb.lambda-url.ap-south-1.on.aws/"
+            );
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "songs.csv"; // filename for download
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+          } catch (err) {
+            console.error("Download failed:", err);
+          }
+        }}
+      >
+        Download Full CSV
+      </button>
 
       <button
         onClick={() => setIsOpen(true)}
@@ -90,7 +100,6 @@ const FiltersSection = ({
               onChange={(e) => {
                 setSelectedCity(e.target.value);
               }}
-              
               className="w-full border border-gray-700 px-3 py-2 rounded bg-gray-900 text-gray-200 mb-4 focus:outline-none focus:ring-2 focus:ring-yellow-400"
             >
               <option value="">Select city</option>
@@ -102,9 +111,7 @@ const FiltersSection = ({
             </select>
 
             {/* Date Filter */}
-            <label className="block text-sm text-gray-400 mb-1">
-              📅 Date
-            </label>
+            <label className="block text-sm text-gray-400 mb-1">📅 Date</label>
             <input
               type="date"
               value={datee}
