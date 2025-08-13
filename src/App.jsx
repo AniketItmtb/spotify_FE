@@ -8,10 +8,7 @@ const API = import.meta.env.VITE_API;
 const Index = () => {
  function getSpecialDate(today = new Date()) {
    const targetDates = [
-     { month: 8, days: [1, 2, 3, 4, 5, 6] }, // Aug
-     { month: 2, days: [15, 16, 17, 18, 19] }, // Feb
-     { month: 2, days: [27, 28] }, // Feb
-     { month: 3, days: [4, 5, 6, 7, 8, 9, 10, 11] }, // March
+     { month: 8, days: [8,9,10,11,12] }, // Aug 
    ];
 
    const day = today.getDate();
@@ -156,38 +153,106 @@ const Index = () => {
 
   const dateParam = getSpecialDate(new Date(selectedDate));
 
-  useEffect(() => {
-    const fetchData = async () => {
-     setIsLoading(true);
+useEffect(() => {
+  let isMounted = true; // avoid state updates after unmount
+  const songsPerFetch = 250;
+const fetchSongsBatch = async (lastKeyParam = null, isFirstBatch = false) => {
+  if (!isMounted) return;
+  setIsLoading(true);
 
-     try {
-       let initialRes = await fetch(`${API}/song`, {
-         method: "POST",
-         headers: {
-           "Content-Type": "application/json",
-         },
-         body: JSON.stringify({ date: dateParam }),
-       });
+  try {
+    const response = await fetch(`${API}/song`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        date: dateParam,
+        limit: songsPerFetch,
+        lastKey: lastKeyParam,
+      }),
+    });
 
-       if (!initialRes.ok) throw new Error("Failed to fetch initial song data");
+    if (!response.ok) throw new Error("Failed to fetch songs");
 
-       let initialData = await initialRes.json();
-       let parsedBody = JSON.parse(initialData.body);
+    const data = await response.json();
+    const parsed = JSON.parse(data.body);
 
-       setSongData(parsedBody.data);
-       setCurrentPage(1);
-       setHasScraped(true);
-     } catch (error) {
-       console.error(error);
-       // Optionally, show an error to user
-     } finally {
-       setIsLoading(false);
+    if (isMounted) {
+   setSongData((prev) => {
+     // Create a map of city -> { ranks: Set, tracks: Set } to track duplicates
+     const cityMap = {};
+
+     prev.forEach((song) => {
+       const city = (song.city || "unknown").trim().toLowerCase();
+       if (!cityMap[city])
+         cityMap[city] = { ranks: new Set(), tracks: new Set() };
+       cityMap[city].ranks.add(song.rank);
+       cityMap[city].tracks.add(song.track_name.toLowerCase());
+     });
+
+     const newUniqueSongs = parsed.data.filter((song) => {
+       const city = (song.city || "unknown").trim().toLowerCase();
+       const track = song.track_name.toLowerCase();
+       const rank = song.rank;
+
+       if (!cityMap[city])
+         cityMap[city] = { ranks: new Set(), tracks: new Set() };
+
+       if (cityMap[city].ranks.has(rank) || cityMap[city].tracks.has(track)) {
+         return false; // Duplicate by rank or track in same city
+       }
+
+       // Mark this song as seen
+       cityMap[city].ranks.add(rank);
+       cityMap[city].tracks.add(track);
+
+       return true;
+     });
+
+     const updatedData = [...prev, ...newUniqueSongs];
+
+     // Optional: city summary
+     if (!parsed.lastKey) {
+       const citySummary = updatedData.reduce((acc, song) => {
+         const city = (song.city || "unknown").trim().toLowerCase();
+         acc[city] = (acc[city] || 0) + 1;
+         return acc;
+       }, {});
+       console.log("City Summary:", citySummary);
      }
- // Stop loader here so old data is visible immediately
-    };
 
-    fetchData();
-  }, [selectedDate, dateParam]);
+     return updatedData;
+   });
+
+
+
+
+      // Set hasScraped true after first batch
+      if (isFirstBatch) setHasScraped(true);
+
+      // If there is more data, fetch next batch
+      if (parsed.lastKey) {
+        fetchSongsBatch(parsed.lastKey);
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (isMounted) setIsLoading(false);
+  }
+};
+
+
+  setSongData([]); // reset song data on new date
+  setCurrentPage(1);
+
+  // Start fetching
+  // Start fetching with first batch flag
+  fetchSongsBatch(null, true);
+
+  return () => {
+    isMounted = false; // cleanup
+  };
+}, [selectedDate, dateParam]);
 
   return (
     <div className="min-h-screen bg-black text-gray-200">

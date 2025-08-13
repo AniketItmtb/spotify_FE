@@ -27,74 +27,7 @@ const SongTable = ({
     endPage = totalPages;
     startPage = Math.max(1, endPage - maxButtons + 1);
   }
-
-  // Sorting function with all keys handled properly
-  // const getValue = (song) => {
-  //   const key = sortConfig.key;
-
-  //   if (!key) return "";
-
-  //   // Handle rank and track_name directly
-  //   if (key === "rank") return Number(song.rank);
-  //   if (key === "track_name") return song.track_name.toLowerCase();
-
-  //   // Handle artists array
-  //   if (key === "artists") {
-  //     return Array.isArray(song.artists)
-  //       ? song.artists.join(", ").toLowerCase()
-  //       : "";
-  //   }
-
-  //   // Handle city and scraped_Date (top-level fields)
-  //   if (key === "city") {
-  //     return song.city ? song.city.toLowerCase() : "";
-  //   }
-
-  //   if (key === "scraped_Date") {
-  //     return song.scraped_Date ? song.scraped_Date.toLowerCase() : "";
-  //   }
-
-  //   // Handle Release Date and other date fields inside details - parse dates for sorting
-  //   const dateKeys = ["Release Date", "First entry date", "scraped_Date"];
-  //   if (dateKeys.includes(key)) {
-  //     const dateStr = song.details?.[key] || song[key] || "";
-  //     const dateVal = new Date(dateStr);
-  //     return isNaN(dateVal) ? 0 : dateVal.getTime();
-  //   }
-
-  //   // Handle numeric field Total weeks on chart inside details
-  //   if (key === "Total weeks on chart") {
-  //     const val = song.details?.[key];
-  //     return val ? Number(val) : 0;
-  //   }
-
-  //   // Handle Source inside details
-  //   if (key === "Source") {
-  //     return song.details?.[key]?.toLowerCase() || "";
-  //   }
-
-  //   // For Listen or any unknown key, return empty string
-  //   return "";
-  // };
-
-  // Sort the songs according to sortConfig
-  // const sortedSongs = [...songs].sort((a, b) => {
-  //   if (!sortConfig.key) return 0;
-
-  //   const aVal = getValue(a);
-  //   const bVal = getValue(b);
-
-  //   const direction = sortConfig.direction === "asc" ? 1 : -1;
-
-  //   // If both are numbers, numeric sort
-  //   if (typeof aVal === "number" && typeof bVal === "number") {
-  //     return (aVal - bVal) * direction;
-  //   }
-
-  //   // Otherwise, string comparison
-  //   return aVal.localeCompare(bVal) * direction;
-  // });
-
+ 
   return (
     <div className="space-y-6">
       {/* Headers */}
