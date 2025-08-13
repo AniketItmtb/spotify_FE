@@ -68,7 +68,7 @@ const FiltersSection = ({
           }
         }}
       >
-        Download Full CSV
+        Download CSV
       </button>
 
       <button

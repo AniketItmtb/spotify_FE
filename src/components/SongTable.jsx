@@ -7,8 +7,7 @@ const headers = [
   { label: "Source", key: "Source" },
   { label: "Total Weeks", key: "Total weeks on chart" },
   { label: "City", key: "city" },
-  { label: "Date", key: "scraped_Date" },
-  { label: "Listen", key: "" },
+  { label: "Date", key: "scraped_Date" }, 
 ];
 
 const SongTable = ({
@@ -31,30 +30,40 @@ const SongTable = ({
   return (
     <div className="space-y-6">
       {/* Headers */}
-      <div className="hidden sm:grid grid-cols-9 gap-4 px-6 py-2 bg-gray-800 rounded-lg border border-gray-700 text-sm font-semibold text-yellow-400">
-        {headers.map(({ label, key }) => (
-          <div
-            key={label}
-            onClick={() =>
-              key &&
-              onSortChange((prev) => ({
-                key,
-                direction:
-                  prev.key === key && prev.direction === "asc" ? "desc" : "asc",
-              }))
-            }
-            className={`whitespace-nowrap ${
-              key ? "cursor-pointer hover:underline" : ""
-            }`}
-          >
-            {label}
-            {sortConfig.key === key && (
-              <span className="ml-1">
-                {sortConfig.direction === "asc" ? "▲" : "▼"}
-              </span>
-            )}
-          </div>
-        ))}
+      <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-10 px-4 sm:px-6 py-2 bg-gray-800 rounded-lg border border-gray-700 text-sm font-semibold text-yellow-400">
+        <span className="w-full sm:w-auto">Sort by</span>
+        {headers.map(({ label, key }) => {
+          const isSorted = sortConfig.key === key;
+          return (
+            <div
+              key={label}
+              onClick={() =>
+                key &&
+                onSortChange((prev) => ({
+                  key,
+                  direction:
+                    prev.key === key && prev.direction === "asc"
+                      ? "desc"
+                      : "asc",
+                }))
+              }
+              className={`flex items-center gap-1 whitespace-nowrap 
+          ${key ? "cursor-pointer select-none hover:text-yellow-300" : ""}
+        `}
+            >
+              <span>{label}</span>
+              {isSorted && (
+                <span
+                  className={`transition-transform duration-200 ${
+                    sortConfig.direction === "asc" ? "rotate-0" : "rotate-180"
+                  }`}
+                >
+                  ▲
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 gap-4">
@@ -91,7 +100,7 @@ const SongTable = ({
                       {/* Tags */}
                       <div className="flex flex-wrap gap-1 text-[10px] xs:text-xs w-full sm:w-auto mt-1 sm:mt-0">
                         {song.city && (
-                          <span className="border border-purple-500 text-purple-400 rounded hover:bg-purple-500 hover:text-white transition px-2 py-0.5 whitespace-nowrap">
+                          <span className="border border-purple-500 capitalize text-purple-400 rounded hover:bg-purple-500 hover:text-white transition px-2 py-0.5 whitespace-nowrap">
                             {song.city}
                           </span>
                         )}
